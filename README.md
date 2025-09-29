@@ -7,7 +7,7 @@ QuizNote - AI-powered note-taking and quiz platform
 This project is set up with a comprehensive development environment including:
 
 ### 🛠️ Tech Stack
-- **React 19** with TypeScript
+- **React 18** with TypeScript
 - **Vite** for fast development and building
 - **ESLint & Prettier** for code quality
 - **Jest & React Testing Library** for testing
