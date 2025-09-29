@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Frontend development service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: quiznote-frontend-dev
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://backend:8000/api
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    networks:
+      - quiznote-network
+    restart: unless-stopped
+
+  # Mock backend service for development
+  backend:
+    image: node:18-alpine
+    container_name: quiznote-backend-mock
+    working_dir: /app
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./mock-backend:/app
+    command: >
+      sh -c "
+        if [ ! -f package.json ]; then
+          npm init -y &&
+          npm install express cors helmet morgan &&
+          echo 'Mock backend initialized'
+        fi &&
+        node server.js
+      "
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+    networks:
+      - quiznote-network
+    restart: unless-stopped
+
+  # Redis for caching (optional for development)
+  redis:
+    image: redis:7-alpine
+    container_name: quiznote-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - quiznote-network
+    restart: unless-stopped
+
+networks:
+  quiznote-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
